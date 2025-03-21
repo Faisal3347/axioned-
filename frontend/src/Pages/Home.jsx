@@ -1,44 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CommonTable from "../components/Table/CommonTable";
 
+const API_URL = "https://jsonplaceholder.typicode.com/posts"; 
+
 function Home() {
-  const columns = ["Product Name", "Brand", "Category", "Price", "Stock"];
+  const columns = ["ID", "Title", "Description"];
 
-  const initialData = [
-    { product_name: "iPhone 15", brand: "Apple", category: "Smartphone", price: "$999", stock: "Available" },
-    { product_name: "Samsung Galaxy S23", brand: "Samsung", category: "Smartphone", price: "$899", stock: "Available" },
-    { product_name: "Dell XPS 13", brand: "Dell", category: "Laptop", price: "$1299", stock: "Out of Stock" },
-    { product_name: "Sony WH-1000XM5", brand: "Sony", category: "Headphones", price: "$399", stock: "Available" },
-    { product_name: "iPad Air", brand: "Apple", category: "Tablet", price: "$599", stock: "Available" },
-    { product_name: "Lenovo Legion 5", brand: "Lenovo", category: "Gaming Laptop", price: "$1099", stock: "Limited Stock" },
-    { product_name: "Google Pixel 8", brand: "Google", category: "Smartphone", price: "$699", stock: "Available" },
-    { product_name: "Bose QuietComfort 45", brand: "Bose", category: "Headphones", price: "$329", stock: "Available" },
-    { product_name: "Asus ROG Zephyrus G14", brand: "Asus", category: "Gaming Laptop", price: "$1499", stock: "Available" },
-    { product_name: "Amazon Echo Dot", brand: "Amazon", category: "Smart Home", price: "$49", stock: "Available" },
-    { product_name: "Apple Watch Series 9", brand: "Apple", category: "Wearable", price: "$499", stock: "Available" },
-    { product_name: "DJI Mini 3 Pro", brand: "DJI", category: "Drone", price: "$759", stock: "Limited Stock" },
-    { product_name: "Canon EOS R5", brand: "Canon", category: "Camera", price: "$3899", stock: "Limited Stock" },
-    { product_name: "GoPro HERO12", brand: "GoPro", category: "Action Camera", price: "$499", stock: "Available" },
-    { product_name: "Samsung QN90B", brand: "Samsung", category: "Television", price: "$1899", stock: "Out of Stock" },
-    { product_name: "Sony A7 IV", brand: "Sony", category: "Camera", price: "$2499", stock: "Available" },
-  ];
-
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState("");
-  const [data, setData] = useState(initialData);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    // Fetch data from API
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((result) => {
+        setData(result);
+        setFilteredData(result);
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   // Handle search filter
   const handleSearch = (e) => {
     const searchTerm = e.target.value.toLowerCase();
     setSearch(searchTerm);
 
-    const filteredData = initialData.filter(
+    const filtered = data.filter(
       (item) =>
-        item.product_name.toLowerCase().includes(searchTerm) ||
-        item.brand.toLowerCase().includes(searchTerm) ||
-        item.category.toLowerCase().includes(searchTerm)
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.body.toLowerCase().includes(searchTerm)
     );
-    setData(filteredData);
+
+    setFilteredData(filtered);
+    setCurrentPage(1);
   };
 
   // Handle sorting
@@ -46,61 +44,59 @@ function Home() {
     const sortValue = e.target.value;
     setSortKey(sortValue);
 
-    let sortedData = [...data];
+    let sortedData = [...filteredData];
 
     switch (sortValue) {
-      case "name":
-        sortedData.sort((a, b) => a.product_name.localeCompare(b.product_name));
+      case "id":
+        sortedData.sort((a, b) => a.id - b.id);
         break;
-      case "brand":
-        sortedData.sort((a, b) => a.brand.localeCompare(b.brand));
-        break;
-      case "price":
-        sortedData.sort((a, b) => {
-          const priceA = parseFloat(a.price.replace("$", ""));
-          const priceB = parseFloat(b.price.replace("$", ""));
-          return priceA - priceB;
-        });
-        break;
-      case "stock":
-        sortedData.sort((a, b) => a.stock.localeCompare(b.stock));
+      case "title":
+        sortedData.sort((a, b) => a.title.localeCompare(b.title));
         break;
       default:
         break;
     }
 
-    setData(sortedData);
+    setFilteredData(sortedData);
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-100 min-h-screen">
       {/* Search and Filter Controls */}
-      <div className="flex justify-between mb-4">
-        {/* Search Bar */}
-        <input
-          type="text"
-          placeholder="Search by Product, Brand, or Category..."
-          value={search}
-          onChange={handleSearch}
-          className="border p-2 rounded-md w-2/3"
-        />
+      <div className="bg-white shadow-lg p-4 rounded-lg mb-6">
+        <div className="flex flex-col md:flex-row md:justify-between gap-4">
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="🔍 Search by Title or Description..."
+            value={search}
+            onChange={handleSearch}
+            className="border border-gray-300 p-3 rounded-lg w-full md:w-2/3 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm"
+          />
 
-        {/* Sort Dropdown */}
-        <select
-          value={sortKey}
-          onChange={handleSort}
-          className="border p-2 rounded-md w-1/4"
-        >
-          <option value="">Sort by</option>
-          <option value="name">Product Name</option>
-          <option value="brand">Brand</option>
-          <option value="price">Price</option>
-          <option value="stock">Stock</option>
-        </select>
+          {/* Sort Dropdown */}
+          <select
+            value={sortKey}
+            onChange={handleSort}
+            className="border border-gray-300 p-3 rounded-lg w-full md:w-1/4 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm cursor-pointer"
+          >
+            <option value="">Sort by</option>
+            <option value="id">🔢 ID</option>
+            <option value="title">🔤 Title</option>
+          </select>
+        </div>
       </div>
 
       {/* Table with pagination */}
-      <CommonTable columns={columns} data={data} itemsPerPage={6} />
+      <div className="bg-white shadow-lg p-6 rounded-lg">
+        <CommonTable
+          columns={columns}
+          data={filteredData}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+        />
+      </div>
     </div>
   );
 }
