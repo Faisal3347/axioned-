@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CommonTable from "../components/Table/CommonTable";
 
-const API_URL = "https://jsonplaceholder.typicode.com/posts"; // Sample API
+const API_URL = "https://jsonplaceholder.typicode.com/posts"; 
 
 function Home() {
   const columns = ["ID", "Title", "Description"];

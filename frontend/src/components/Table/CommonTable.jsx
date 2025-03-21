@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ItemDetailsModal from "./ItemDetailsModal";
+import ItemDetailsModal from "../models/ItemDetailModels";
 
 const CommonTable = ({ columns, data, currentPage, setCurrentPage, itemsPerPage }) => {
   const totalPages = Math.ceil(data.length / itemsPerPage);
